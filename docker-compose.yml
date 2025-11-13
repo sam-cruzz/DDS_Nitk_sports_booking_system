@@ -1,0 +1,206 @@
+services:
+  database:
+    container_name: database
+    image: mysql:8.0.33
+    restart: always
+    env_file:
+      - .env
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DATABASE_PASSWORD}
+      MYSQL_USER: ${DATABASE_APP_USER}
+      MYSQL_PASSWORD: ${DATABASE_APP_PASSWORD}
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u root -p${DATABASE_PASSWORD}"]
+      interval: 20s
+      timeout: 10s
+      retries: 5
+    networks:
+      - springbootmicroservicesnetwork
+
+
+  eurekaserver:
+    image: eurekaserver:latest
+    build:
+      context: ./eurekaserver
+      dockerfile: Dockerfile
+    ports:
+      - "8761:8761"
+    environment:
+      - SPRING_APPLICATION_NAME=eurekaserver
+      - EUREKA_INSTANCE_HOSTNAME=localhost
+      - EUREKA_CLIENT_REGISTER_WITH_EUREKA=false
+      - EUREKA_CLIENT_FETCH_REGISTRY=false
+      - SERVER_PORT=8761
+    networks:
+      - springbootmicroservicesnetwork
+
+  apigateway:
+    image: apigateway:latest
+    build:
+      context: ./apigateway
+      dockerfile: Dockerfile
+    ports:
+      - "1110:1110"
+    environment:
+      - SPRING_APPLICATION_NAME=apigateway
+      - EUREKA_SERVICE_URL=http://eurekaserver:8761/eureka/
+    depends_on:
+      eurekaserver:
+        condition: service_started
+    networks:
+      - springbootmicroservicesnetwork
+
+  productservice:
+    image: productservice:latest
+    build:
+      context: ./productservice
+      dockerfile: Dockerfile
+    ports:
+      - "1111:1111"
+    env_file:
+      - .env
+    environment:
+      - SERVER_PORT=1111
+      - SPRING_APPLICATION_NAME=productservice
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eurekaserver:8761/eureka/
+      - SPRING_DATASOURCE_URL=jdbc:mysql://database:3306/springbootmicroservicesjwtproduct?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      - SPRING_DATASOURCE_USERNAME=${DATABASE_APP_USER}
+      - SPRING_DATASOURCE_PASSWORD=${DATABASE_APP_PASSWORD}
+    depends_on:
+      database:
+        condition: service_healthy
+      eurekaserver:
+        condition: service_started
+    networks:
+      - springbootmicroservicesnetwork
+
+  authservice:
+    image: authservice:latest
+    build:
+      context: ./authservice
+      dockerfile: Dockerfile
+    ports:
+      - "1112:1112"
+    environment:
+      - server.port=1112
+      - SPRING_APPLICATION_NAME=authservice
+      - EUREKA_SERVICE_URL=http://eurekaserver:8761/eureka/
+    depends_on:
+      eurekaserver:
+        condition: service_started
+    networks:
+      - springbootmicroservicesnetwork
+
+  userservice:
+    image: userservice:latest
+    build:
+      context: ./userservice
+      dockerfile: Dockerfile
+    ports:
+      - "1113:1113"
+    env_file:
+      - .env
+    environment:
+      - SERVER_PORT=1113
+      - SPRING_APPLICATION_NAME=userservice
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eurekaserver:8761/eureka/
+      - SPRING_DATASOURCE_URL=jdbc:mysql://database:3306/springbootmicroservicesjwtuser?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      - SPRING_DATASOURCE_USERNAME=${DATABASE_APP_USER}
+      - SPRING_DATASOURCE_PASSWORD=${DATABASE_APP_PASSWORD}
+    depends_on:
+      database:
+        condition: service_healthy
+      eurekaserver:
+        condition: service_started
+    networks:
+      - springbootmicroservicesnetwork
+
+  bookingservice:
+    image: bookingservice:latest
+    build:
+      context: ./bookingservice
+      dockerfile: Dockerfile
+    ports:
+      - "1116:1116"
+    env_file:
+      - .env
+    environment:
+      - SERVER_PORT=1116
+      - SPRING_APPLICATION_NAME=bookingservice
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eurekaserver:8761/eureka/
+      - SPRING_DATASOURCE_URL=jdbc:mysql://database:3306/springbootdb?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      - SPRING_DATASOURCE_USERNAME=${DATABASE_APP_USER}
+      - SPRING_DATASOURCE_PASSWORD=${DATABASE_APP_PASSWORD}
+    depends_on:
+      database:
+        condition: service_healthy
+      eurekaserver:
+        condition: service_started
+    networks:
+      - springbootmicroservicesnetwork
+
+  paymentservice:
+    image: paymentservice:latest
+    build:
+      context: ./paymentservice
+      dockerfile: Dockerfile
+    ports:
+      - "1115:1115"
+    env_file:
+      - .env
+    environment:
+      - SERVER_PORT=1115
+      - SPRING_APPLICATION_NAME=paymentservice
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eurekaserver:8761/eureka/
+      - SPRING_DATASOURCE_URL=jdbc:mysql://database:3306/springbootdb?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      - SPRING_DATASOURCE_USERNAME=${DATABASE_APP_USER}
+      - SPRING_DATASOURCE_PASSWORD=${DATABASE_APP_PASSWORD}
+    depends_on:
+      database:
+        condition: service_healthy
+      eurekaserver:
+        condition: service_started
+    networks:
+      - springbootmicroservicesnetwork
+
+  notificationservice:
+    image: notificationservice:latest
+    build:
+      context: ./notificationservice
+      dockerfile: Dockerfile
+    ports:
+      - "1117:1117"
+    environment:
+      - server.port=1117
+      - SPRING_APPLICATION_NAME=notificationservice
+      - EUREKA_SERVICE_URL=http://eurekaserver:8761/eureka/
+    depends_on:
+      eurekaserver:
+        condition: service_started
+    networks:
+      - springbootmicroservicesnetwork
+
+  frontend:
+    image: frontend:latest
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "8080:80"
+    depends_on:
+      - apigateway
+    networks:
+      - springbootmicroservicesnetwork
+
+networks:
+  springbootmicroservicesnetwork:
+    driver: bridge
+
+volumes:
+  mysql_data:
+    driver: local

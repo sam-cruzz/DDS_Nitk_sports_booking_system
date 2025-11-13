@@ -1,0 +1,38 @@
+/* Simple sport-themed auth styles for NITK Sports */
+:root{
+  --primary:#0b5ed7; /* NITK blue-ish */
+  --accent:#ff8c00;  /* energetic orange */
+  --muted:#6b7280;
+  --bg:#f6f9ff;
+}
+
+body{font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;}
+.auth-page{display:flex;min-height:100vh;background:linear-gradient(180deg,#eaf2ff 0%, #f8fcff 100%);}
+.auth-hero{flex:1;display:flex;align-items:center;justify-content:center;padding:48px;background:linear-gradient(135deg,var(--primary),#0f62fe);color:white}
+.auth-hero.small{padding:24px}
+.hero-content{max-width:520px;text-align:left}
+.hero-content h1{font-size:42px;margin:0 0 8px;font-weight:700;letter-spacing:-0.5px}
+.hero-content p{margin:0 0 12px;color:rgba(255,255,255,0.9)}
+.hero-badge{display:inline-block;margin-top:12px;background:rgba(255,255,255,0.12);padding:6px 12px;border-radius:20px;font-weight:600}
+
+.auth-card{width:420px;margin:auto;background:white;border-radius:12px;box-shadow:0 10px 30px rgba(2,6,23,0.08);padding:28px}
+.card-title{margin:0 0 10px;font-size:20px;color:var(--primary)}
+.user-type-toggle{display:flex;gap:8px;margin:12px 0}
+.user-type-toggle button{flex:1;padding:8px 12px;border-radius:8px;border:1px solid #e6edf8;background:#fbfdff;cursor:pointer}
+.user-type-toggle button.active{background:linear-gradient(90deg,var(--primary),#2563eb);color:white;border:none}
+
+.auth-form{display:flex;flex-direction:column;gap:10px}
+.auth-form .row{display:flex;gap:10px}
+.auth-form input{padding:12px;border-radius:8px;border:1px solid #e6edf8;font-size:14px}
+.btn-primary{background:linear-gradient(90deg,var(--primary),#2563eb);color:white;border:none;padding:10px 14px;border-radius:10px;cursor:pointer}
+.big{padding:12px 16px;font-weight:700}
+.muted{margin-top:12px;color:var(--muted);font-size:13px}
+.form-error{color:#b91c1c;background:#fff1f2;padding:8px;border-radius:8px}
+.form-success{color:#065f46;background:#ecfdf5;padding:8px;border-radius:8px}
+
+@media(max-width:900px){
+  .auth-page{flex-direction:column}
+  .auth-hero{padding:30px;text-align:center}
+  .auth-card{width:92%;margin:16px auto}
+  .auth-hero .hero-content{display:none}
+}
