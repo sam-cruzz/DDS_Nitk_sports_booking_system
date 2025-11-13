@@ -598,7 +598,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 👥 Team
 
-- **Developer**: [sam-cruzz](https://github.com/sam-cruzz)
+- **Developers**: 
+  - [sam-cruzz](https://github.com/sam-cruzz) - Shashank Prabhakar
+  - [Riser59](https://github.com/Riser59)
 - **Course**: Distributed Database Systems (DDS) - 221CS246
 - **Institution**: NITK Surathkal
 
